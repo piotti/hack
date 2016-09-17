@@ -17,6 +17,7 @@ circle the squre
 
 from geopy.distance import vincenty
 import random
+import datetime
 
 earth_radius = 6.371*10**6
 
@@ -96,5 +97,63 @@ def money_transfer(player1, player2, amount):
 	player1.money -= amount
 	player2.money += amount
 
+	player1.save(update_fields=["money"])
+	player2.save(update_fields=["money"])
 
 
+def drug_deal(player1, player2, drug_amount):
+	"""
+	player1: Player 1 object (dealer)
+	player2: Player 2 object (customer)
+
+	"""
+	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 30):
+
+		drug_price = (drug_amount) ** (2/3)
+
+		money_amount = int(drug_amount * drug_price)
+		player1.money -= money_amount
+		player2.money += money_amount
+
+		player1.drugs += drug_amount
+		player2.drugs -= drug_amount
+
+		player1.last_drug_transaction = datetime.datetime.utcnow()
+		player2.last_drug_transaction = datetime.datetime.utcnow()
+
+		player1.save(update_fields=["money", "drugs", "last_drug_transaction"])
+		player2.save(update_fields=["money", "drugs", "last_drug_transaction"])
+
+
+def buy_in_bulk(player, drug_amount):
+	"""
+	Buy drugs in bulk from Pepe Escobal
+	"""
+	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 30):
+		if drug_amount >= 1000:
+			drug_price = (drug_amount)**(2/3)
+
+			money_amount = int(drug_amount * drug_price)
+			player.money -= money_amount
+
+			player.drugs += drug_amount
+
+			player.last_drug_transaction = datetime.datetime.utcnow()
+
+			player.save(update_fields=["money", "drugs", "last_drug_transaction"])
+
+
+def sell_to_pleb(player):
+	"""
+	Sell drugs to bot
+	Can only sell in single units
+	"""
+	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 30):
+
+		player.money += 1
+
+		player.drugs -= 1
+
+		player.last_drug_transaction = datetime.datetime.utcnow()
+
+		player.save(update_fields=["money", "drugs", "last_drug_transaction"])
