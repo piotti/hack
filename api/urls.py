@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from . import views, login_views, game_views
+from . import login_views, game_views
 
 app_name = 'api'
 urlpatterns = [

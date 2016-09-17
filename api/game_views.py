@@ -59,7 +59,7 @@ def player_info(request, username, auth, player_name):
 		#More information for own profile
 		c['money'] = player.money
 
-	return JsonResponse())
+	return JsonResponse(c)
 
 
 

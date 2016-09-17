@@ -11,6 +11,9 @@ class CuckUser(models.Model):
 	lon_coord = models.DecimalField(null=True, blank=True, max_digits=9, decimal_places=6)
 	money = models.IntegerField(default=100)
 
+	drugs = models.FloatField(default=0)
+	last_drug_transaction = models.DateTimeField(blank=True, null=True)
+
 	session_auth = models.CharField(max_length=64, blank=True)
 
 
