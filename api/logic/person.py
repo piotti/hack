@@ -70,6 +70,7 @@ def mug(player1, player2): #mugger_score, muggee_score):
 	player1: Player 1 object (mugger)
 	player2: Player 2 object (muggee)
 	"""
+	return_dict = {}
 
 	p1_coords = (player1.lat_coord, player1.lon_coord)
 	p2_coords = (player2.lat_coord, player2.lon_coord)
@@ -86,6 +87,16 @@ def mug(player1, player2): #mugger_score, muggee_score):
 
 		player1.save(update_fields=["money"])
 		player2.save(update_fields=["money"])
+
+		return_dict["amount"] = money_transferred
+		return_dict["reason"] = "none"
+
+	else:
+		return_dict["amount"] = 0
+		return_dict["reason"] = "Target too far"
+
+
+
 
 
 def money_transfer(player1, player2, amount):
@@ -107,40 +118,57 @@ def drug_deal(player1, player2, drug_amount):
 	player2: Player 2 object (customer)
 
 	"""
-	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 30):
+	return_dict = {}
+	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
+		if (date.datetime.utcnow() - player2.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
+			drug_price = (drug_amount) ** (2/3)
 
-		drug_price = (drug_amount) ** (2/3)
+			money_amount = int(drug_amount * drug_price)
+			player1.money -= money_amount
+			player2.money += money_amount
 
-		money_amount = int(drug_amount * drug_price)
-		player1.money -= money_amount
-		player2.money += money_amount
+			player1.drugs += drug_amount
+			player2.drugs -= drug_amount
 
-		player1.drugs += drug_amount
-		player2.drugs -= drug_amount
+			player1.last_drug_transaction = datetime.datetime.utcnow()
+			player2.last_drug_transaction = datetime.datetime.utcnow()
 
-		player1.last_drug_transaction = datetime.datetime.utcnow()
-		player2.last_drug_transaction = datetime.datetime.utcnow()
+			player1.save(update_fields=["money", "drugs", "last_drug_transaction"])
+			player2.save(update_fields=["money", "drugs", "last_drug_transaction"])
 
-		player1.save(update_fields=["money", "drugs", "last_drug_transaction"])
-		player2.save(update_fields=["money", "drugs", "last_drug_transaction"])
+			return_dict["money_amount"] = money_amount
+			return_dict["reason"] = "none"
+		else:
+			return_dict["money_amount"] = 0
+			return_dict["reason"] = "customer is making too many transactions"
+	else:
+		return_dict["money_amount"] = 0
+		return_dict["reason"] = "dealer is making too many transactions"
 
 
 def buy_in_bulk(player, drug_amount):
 	"""
 	Buy drugs in bulk from Pepe Escobal
 	"""
-	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 30):
+	return_dict = {}
+	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
 		if drug_amount >= 1000:
 			drug_price = (drug_amount)**(2/3)
-
 			money_amount = int(drug_amount * drug_price)
 			player.money -= money_amount
-
 			player.drugs += drug_amount
-
 			player.last_drug_transaction = datetime.datetime.utcnow()
 
 			player.save(update_fields=["money", "drugs", "last_drug_transaction"])
+
+			return_dict["money_amount"] = money_amount
+			return_dict["reason"] = "none"
+		else:
+			return_dict["money_amount"] = 0
+			return_dict["reason"] = "Insufficient drugs requested"
+	else:
+		return_dict["money_amount"] = 0
+		return_dict["reason"] = "customer is making too many transactions"
 
 
 def sell_to_pleb(player):
@@ -148,12 +176,16 @@ def sell_to_pleb(player):
 	Sell drugs to bot
 	Can only sell in single units
 	"""
+	return_dict = {}
 	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 30):
-
 		player.money += 1
-
 		player.drugs -= 1
-
 		player.last_drug_transaction = datetime.datetime.utcnow()
 
 		player.save(update_fields=["money", "drugs", "last_drug_transaction"])
+
+		return_dict["money_amount"] = money_amount
+		return_dict["reason"] = "none"
+	else:
+		return_dict["money_amount"] = 0
+		return_dict["reason"] = "dealer is making too many transactions"
