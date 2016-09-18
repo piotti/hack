@@ -14,6 +14,8 @@ class CuckUser(models.Model):
 	money = models.IntegerField(default=100)
 
 	reputation = models.IntegerField(default=0)
+	
+	suspicion = models.IntegerField(default=0)
 
 	drugs = models.FloatField(default=0)
 	last_drug_transaction = models.DateTimeField(blank=True, null=True)
@@ -23,9 +25,8 @@ class CuckUser(models.Model):
 
 
 	def is_criminal(self):
-		if self.mugger_set.count() == 0:
-			return False
-		return timezone.now() - self.mugger_set.all().order_by('-date')[0].date < datetime.timedelta(0,180)
+		if self.suspicion >= 5:
+			return True
 
 	def serialize(self):
 		#Returns JSON of position for other players to access

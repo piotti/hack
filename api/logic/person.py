@@ -78,10 +78,12 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 	mug_limit = 20
 
 	distance = get_distance_length(p1_coords,p2_coords)
+	assert type(distance) = tuple, "Distance:", distance
 
 	if distance < mug_limit:
 		effectiveness = 1 - distance/mug_limit
 		money_transferred = int(effectiveness * (muggee.money) / (muggee.money + 1) ** 0.5)
+		assert money_transferred > 0, "Transaction size: %r" % money_transferred ####
 
 		if muggee.money < 0:
 			return_dict["amount"] = 0
@@ -96,8 +98,9 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 			muggee.money -= money_transferred
 
 		mugger.reputation += 1
+		mugger.suspicion += 1
 
-		mugger.save(update_fields=["money", "reputation"])
+		mugger.save(update_fields=["money", "reputation", "suspicion"])
 		muggee.save(update_fields=["money"])
 
 		return_dict["amount"] = money_transferred
@@ -108,7 +111,7 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 		return_dict["reason"] = "Target too far"
 
 
-
+	return return_dict
 
 
 def money_transfer(player1, player2, amount):
@@ -123,13 +126,13 @@ def money_transfer(player1, player2, amount):
 	player1.save(update_fields=["money"])
 	player2.save(update_fields=["money"])
 
-
 def drug_deal(dealer, customer, drug_amount):
 	"""
 	dealer: Person object
 	customer: Person object
 
 	"""
+	assert drug_amount > 0, "Drug amount: %r" % drug_amount ####
 	return_dict = {}
 	if (date.datetime.utcnow() - dealer.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
 		if (date.datetime.utcnow() - customer.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
@@ -150,8 +153,11 @@ def drug_deal(dealer, customer, drug_amount):
 			dealer.last_drug_transaction = datetime.datetime.utcnow()
 			customer.last_drug_transaction = datetime.datetime.utcnow()
 
-			dealer.save(update_fields=["money", "drugs", "last_drug_transaction"])
-			customer.save(update_fields=["money", "drugs", "last_drug_transaction"])
+			dealer.suspicion += 1
+			customer.suspicion += 1
+
+			dealer.save(update_fields=["money", "drugs", "last_drug_transaction", "suspicion"])
+			customer.save(update_fields=["money", "drugs", "last_drug_transaction", "suspicion"])
 
 			return_dict["money_amount"] = money_amount
 			return_dict["reason"] = "none"
@@ -162,11 +168,15 @@ def drug_deal(dealer, customer, drug_amount):
 		return_dict["money_amount"] = 0
 		return_dict["reason"] = "dealer is making too many transactions"
 
+	return return_dict
+
 
 def buy_in_bulk(player, drug_amount):
 	"""
 	Buy drugs in bulk from Pepe Escobal
 	"""
+	assert drug_amount > 0, "Drug amount: %r" % drug_amount ####
+
 	return_dict = {}
 	if (date.datetime.utcnow() - player.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
 		if drug_amount >= 1000:
@@ -176,7 +186,6 @@ def buy_in_bulk(player, drug_amount):
 			if player.money < money_amount:
 				return_dict["money_amount"] = 0
 				return_dict["reason"] = "Customer has insufficient money"
-
 
 			player.money -= money_amount
 			player.drugs += drug_amount
@@ -192,6 +201,8 @@ def buy_in_bulk(player, drug_amount):
 	else:
 		return_dict["money_amount"] = 0
 		return_dict["reason"] = "customer is making too many transactions"
+
+	return return_dict
 
 
 def sell_to_pleb(player):
@@ -213,6 +224,8 @@ def sell_to_pleb(player):
 		return_dict["money_amount"] = 0
 		return_dict["reason"] = "dealer is making too many transactions"
 
+	return return_dict
+
 
 def bust(rat, victim):
 	"""
@@ -231,5 +244,17 @@ def bust(rat, victim):
 
 	victim.reputation = 0
 
-	victim.save(update_fields=["drugs", "reputation"])
-	rat.save(update_fields=["money"])
+	rat.suspicion -= 5
+	victim.suspicion += 2
+
+	victim.save(update_fields=["drugs", "reputation", "suspicion"])
+	rat.save(update_fields=["money", "suspicion"])
+
+def prostitute(prostitute):
+
+	prostitute.suspicion += 1
+	prostitute.money += 5
+
+def hide(person):
+	
+	prostitute.suspicion -= 1
