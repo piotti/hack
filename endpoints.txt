@@ -19,10 +19,10 @@ Ping Location:
 	{
 		'nearby_players': 
 			[
-				{
-					'lat_coord':<FLOAT>,
-					'lon_coord':<FLOAT>,
-					'criminal':<BOOL>
+					<username>,
+					<lat_coord>,
+					<lon_coord>,
+					<criminal>
 				},
 				>>same thing for all other players<<
 			],

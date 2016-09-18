@@ -39,6 +39,7 @@ class CuckUser(models.Model):
 	def serialize(self):
 		#Returns JSON of position for other players to access
 		return [
+			self.user.username,
 			str(self.lat_coord),
 			str(self.lon_coord),
 			str(self.is_criminal()),

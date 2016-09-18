@@ -29,6 +29,7 @@ def ping(request, username, auth, lat, lon):
 	if not login_views.authenticate(username, auth):
 		return auth_error()
 
+
 	# Get bounds of square for nearby players
 	bounds = [float(b) for b in request.GET.get('bounds',[]).split(',')]
 	if len(bounds) != 4:
@@ -43,6 +44,9 @@ def ping(request, username, auth, lat, lon):
 	))
 
 	me_c = get_player_from_username(username)
+	me_c.lat_coord = lat
+	me_c.lon_coord = lon
+	me_c.save(update_fields=['lat_coord', 'lon_coord'])
 	notifs = [n.msg for n in list(me_c.notifications.all())]
 	me_c.notifications.clear()
 

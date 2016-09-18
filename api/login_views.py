@@ -23,10 +23,7 @@ def authenticate(username, key):
 	return cuck_user.session_auth == key
 
 def index(request):
-	return JsonResponse({
-		'authenticated':authenticate(request.GET.get('username', ''),
-						request.GET.get('auth', ''))
-		})
+	return render(request, 'api/index.html', {})
 
 def create_user(request):
 	def error(msg):
