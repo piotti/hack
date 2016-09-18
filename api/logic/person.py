@@ -78,7 +78,7 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 	mug_limit = 20
 
 	distance = get_distance_length(p1_coords,p2_coords)
-	assert type(distance) == float, "Distance: %r" % distance
+	assert type(distance) == float, "Distance: %r" % distance ####
 
 	if distance < mug_limit:
 		effectiveness = 1 - distance/mug_limit
@@ -250,11 +250,22 @@ def bust(rat, victim):
 	victim.save(update_fields=["drugs", "reputation", "suspicion"])
 	rat.save(update_fields=["money", "suspicion"])
 
-def prostitute(prostitute):
+def prostitute(prostitute):	
+	
+	return_dict = {}
+	if (date.datetime.utcnow() - prostitute.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 5):
+		prostitute.suspicion += 1
+		prostitute.money += 5
 
-	prostitute.suspicion += 1
-	prostitute.money += 5
+		return_dict["money_amount"] = 5
+		return_dict["reason"] = "None"
+	else:
+		return_dict["money_amount"] = 0
+		return_dict["reason"] = "Prostitute is doing it too often"
+
+	return return_dict
+
 
 def hide(person):
 	
-	prostitute.suspicion -= 1
+	person.suspicion -= 1
