@@ -25,6 +25,10 @@ Ping Location:
 					'criminal':<BOOL>
 				},
 				>>same thing for all other players<<
+			],
+
+			'notifications': [
+				<STRING>,<STRING>,...
 			]
 	}
 
