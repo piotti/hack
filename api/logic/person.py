@@ -256,6 +256,7 @@ def prostitute(prostitute):
 	if (date.datetime.utcnow() - prostitute.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 5):
 		prostitute.suspicion += 1
 		prostitute.money += 5
+		prostitute.last_drug_transaction = datetime.datetime.utcnow()
 
 		return_dict["money_amount"] = 5
 		return_dict["reason"] = "None"
