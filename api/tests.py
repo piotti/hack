@@ -69,6 +69,32 @@ class ApiTests(TestCase):
 		self.assertEqual(resp.status_code, 200)
 		self.assertIs(type(resp.json()['nearby_players']), list)
 		self.assertEqual(len(resp.json()['nearby_players']), 2)
+
+
+	def test_player_info(self):
+		c = Client()
+		user, key = self.makeTestUser(c)
+
+		me_c = CuckUser.objects.get(user=user)
+		me_c.lat_coord=0
+		me_c.lon_coord=0
+		me_c.save()
+
+		u1 = User(username='u1')
+		u1.save()
+		p1 = CuckUser(user=u1,
+			lat_coord=0,
+			lon_coord=0)
+		p1.save()
+
+
+		resp = c.get('/api/player_info/%s/%s/%s/' % (user.username, key, 'u1'))
+
+		self.assertEqual(resp.status_code, 200)
+		self.assertEqual(resp.json()['name'], 'u1')
+		self.assertEqual(resp.json()['criminal'], False)
+
+
 		
 
 

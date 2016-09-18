@@ -78,8 +78,8 @@ def mug(request, username, auth, player_name):
 	player2 = get_player_from_username(player_name)
 
 	last_mug_date = max(
-		player1.mugger_set.filter(muggee=player2).order_by('-date').date,
-		player1.muggee_set.filter(mugger=player2).order_by('-date').date
+		player1.mugger_set.filter(muggee=player2).order_by('-date')[0].date,
+		player1.muggee_set.filter(mugger=player2).order_by('-date')[0].date
 		)
 
 	if last_mug_date > timezone.now() - datetime.timedelta(0, 180):

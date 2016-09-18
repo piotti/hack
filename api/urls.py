@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^login_user/$', login_views.login_user, name='authenticate_user'),
 
     ### GAME VIEWS ###
-    url(r'^ping/(?P<username>\w+)/(?P<auth>\w+)/(?P<lat>\d+\.\d+),(?P<lon>\d+\.\d+)/$', game_views.ping, name='ping_location'),
+    url(r'^ping/(?P<username>\w+)/(?P<auth>\w+)/(?P<lat>-?\d+\.\d+),(?P<lon>-?\d+\.\d+)/$', game_views.ping, name='ping_location'),
 	url(r'^player_info/(?P<username>\w+)/(?P<auth>\w+)/(?P<player_name>\w+)/$', game_views.player_info, name='player_info'),
 	
 
