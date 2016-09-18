@@ -98,8 +98,9 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 			muggee.money -= money_transferred
 
 		mugger.reputation += 1
+		mugger.suspicion += 1
 
-		mugger.save(update_fields=["money", "reputation"])
+		mugger.save(update_fields=["money", "reputation", "suspicion"])
 		muggee.save(update_fields=["money"])
 
 		return_dict["amount"] = money_transferred
@@ -124,7 +125,6 @@ def money_transfer(player1, player2, amount):
 
 	player1.save(update_fields=["money"])
 	player2.save(update_fields=["money"])
-
 
 def drug_deal(dealer, customer, drug_amount):
 	"""
@@ -153,8 +153,11 @@ def drug_deal(dealer, customer, drug_amount):
 			dealer.last_drug_transaction = datetime.datetime.utcnow()
 			customer.last_drug_transaction = datetime.datetime.utcnow()
 
-			dealer.save(update_fields=["money", "drugs", "last_drug_transaction"])
-			customer.save(update_fields=["money", "drugs", "last_drug_transaction"])
+			dealer.suspicion += 1
+			customer.suspicion += 1
+
+			dealer.save(update_fields=["money", "drugs", "last_drug_transaction", "suspicion"])
+			customer.save(update_fields=["money", "drugs", "last_drug_transaction", "suspicion"])
 
 			return_dict["money_amount"] = money_amount
 			return_dict["reason"] = "none"
@@ -241,5 +244,8 @@ def bust(rat, victim):
 
 	victim.reputation = 0
 
-	victim.save(update_fields=["drugs", "reputation"])
-	rat.save(update_fields=["money"])
+	rat.suspicion -= 5
+	victim.suspicion += 2
+
+	victim.save(update_fields=["drugs", "reputation", "suspicion"])
+	rat.save(update_fields=["money", "suspicion"])
