@@ -249,3 +249,12 @@ def bust(rat, victim):
 
 	victim.save(update_fields=["drugs", "reputation", "suspicion"])
 	rat.save(update_fields=["money", "suspicion"])
+
+def prostitute(prostitute):
+
+	prostitute.suspicion += 1
+	prostitute.money += 5
+
+def hide(person):
+	
+	prostitute.suspicion -= 1
