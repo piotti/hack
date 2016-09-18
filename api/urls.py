@@ -16,5 +16,5 @@ urlpatterns = [
 
 	### ACTIONS ###
 	url(r'^action/mug/(?P<username>\w+)/(?P<auth>\w+)/(?P<player_name>\w+)', game_views.mug, name='mug'),
-
+	url(r'^action/bust(?P<username>\w+)/(?P<auth>\w+)/(?P<player_name>\w+)', game_views.bust, name='bust'),
 ]

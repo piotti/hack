@@ -1,5 +1,7 @@
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from django.utils import timezone
+import datetime
 
 from . import login_views
 
@@ -11,7 +13,7 @@ def ping_location(request, lat, lon):
 
 from .logic import person #Austin's shit here
 
-from .models import CuckUser
+from .models import *
 
 def auth_error():
 	return JsonResponse({'success':False, 'error':'Authentication failed'})
@@ -75,14 +77,36 @@ def mug(request, username, auth, player_name):
 	player1 = get_player_from_username(username)
 	player2 = get_player_from_username(player_name)
 
-	mugSuccess = person.mug(player1, player2)
+	last_mug_date = max(
+		player1.mugger_set.filter(muggee=player2).order_by('-date').date,
+		player1.muggee_set.filter(mugger=player2).order_by('-date').date
+		)
+
+	if last_mug_date > timezone.now() - datetime.timedelta(0, 180):
+		success=False
+		msg='You mugged or got mugged by this person too recently'
+	else:
+
+		mugData = person.mug(player1, player2)
+
+		success = mugData['money'] > 0
+		msg = mugData['reason']
+
+		if success:
+			mugging = Mugging(mugger=player1, muggee=player2, date=timezone.now())
+			mugging.save()
 
 	return JsonResponse({
-		'success':True,
+		'success':success,
+		'message': msg,
+		'transaction':mugData['money'],
 		'your_money':player1.money,
-		'their_money':player2.money
 
 		})
+
+
+def bust(request, username, auth, player_name):
+	pass
 		
 
 
