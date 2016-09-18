@@ -65,15 +65,15 @@ def in_circle_from_square(coordinates, x, y):
 
 
 
-def mug(player1, player2): #mugger_score, muggee_score):
+def mug(mugger, muggee): #mugger_score, muggee_score):
 	"""
-	player1: Player 1 object (mugger)
-	player2: Player 2 object (muggee)
+	mugger: Person object
+	muggee: Person object
 	"""
 	return_dict = {}
 
-	p1_coords = (player1.lat_coord, player1.lon_coord)
-	p2_coords = (player2.lat_coord, player2.lon_coord)
+	p1_coords = (mugger.lat_coord, mugger.lon_coord)
+	p2_coords = (muggee.lat_coord, muggee.lon_coord)
 
 	mug_limit = 20
 
@@ -81,12 +81,14 @@ def mug(player1, player2): #mugger_score, muggee_score):
 
 	if distance < mug_limit:
 		effectiveness = 1 - distance/mug_limit
-		money_transferred = int(effectiveness * (player2.money) / (player2.money + 1) ** 0.5)
-		player1.money += money_transferred
-		player2.money -= money_transferred
+		money_transferred = int(effectiveness * (muggee.money) / (muggee.money + 1) ** 0.5)
+		mugger.money += money_transferred
+		muggee.money -= money_transferred
 
-		player1.save(update_fields=["money"])
-		player2.save(update_fields=["money"])
+		mugger.reputation += 1
+
+		mugger.save(update_fields=["money", "reputation"])
+		muggee.save(update_fields=["money"])
 
 		return_dict["amount"] = money_transferred
 		return_dict["reason"] = "none"
@@ -112,29 +114,29 @@ def money_transfer(player1, player2, amount):
 	player2.save(update_fields=["money"])
 
 
-def drug_deal(player1, player2, drug_amount):
+def drug_deal(dealer, customer, drug_amount):
 	"""
-	player1: Player 1 object (dealer)
-	player2: Player 2 object (customer)
+	dealer: Person object
+	customer: Person object
 
 	"""
 	return_dict = {}
-	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
-		if (date.datetime.utcnow() - player2.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
+	if (date.datetime.utcnow() - dealer.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
+		if (date.datetime.utcnow() - customer.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
 			drug_price = (drug_amount) ** (2/3)
 
 			money_amount = int(drug_amount * drug_price)
-			player1.money -= money_amount
-			player2.money += money_amount
+			dealer.money -= money_amount
+			customer.money += money_amount
 
-			player1.drugs += drug_amount
-			player2.drugs -= drug_amount
+			dealer.drugs += drug_amount
+			customer.drugs -= drug_amount
 
-			player1.last_drug_transaction = datetime.datetime.utcnow()
-			player2.last_drug_transaction = datetime.datetime.utcnow()
+			dealer.last_drug_transaction = datetime.datetime.utcnow()
+			customer.last_drug_transaction = datetime.datetime.utcnow()
 
-			player1.save(update_fields=["money", "drugs", "last_drug_transaction"])
-			player2.save(update_fields=["money", "drugs", "last_drug_transaction"])
+			dealer.save(update_fields=["money", "drugs", "last_drug_transaction"])
+			customer.save(update_fields=["money", "drugs", "last_drug_transaction"])
 
 			return_dict["money_amount"] = money_amount
 			return_dict["reason"] = "none"
@@ -151,7 +153,7 @@ def buy_in_bulk(player, drug_amount):
 	Buy drugs in bulk from Pepe Escobal
 	"""
 	return_dict = {}
-	if (date.datetime.utcnow() - player1.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
+	if (date.datetime.utcnow() - player.last_drug_transaction) > date.datetime(0, 0, 0, 0, 0, 1):
 		if drug_amount >= 1000:
 			drug_price = (drug_amount)**(2/3)
 			money_amount = int(drug_amount * drug_price)
@@ -189,3 +191,22 @@ def sell_to_pleb(player):
 	else:
 		return_dict["money_amount"] = 0
 		return_dict["reason"] = "dealer is making too many transactions"
+
+
+def bust(rat, victim):
+	"""
+	rat: person
+	victim: person
+	rat causes victim to be busted
+	victim loses all drugs
+	Reputation is the number of times the victim mugged someone without getting caught
+	Reputation reset to zero
+	Rat gets commission of 10
+	"""
+
+	victim.drugs = 0
+	victim.reputation = 0
+	rat.money += 10
+
+	victim.save(update_fields=["drugs", "reputation"])
+	rat.save(update_fields=["money"])
