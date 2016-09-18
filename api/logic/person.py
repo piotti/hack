@@ -78,7 +78,7 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 	mug_limit = 20
 
 	distance = get_distance_length(p1_coords,p2_coords)
-	assert type(distance) == tuple, "Distance: %r" % distance
+	assert type(distance) == float, "Distance: %r" % distance
 
 	if distance < mug_limit:
 		effectiveness = 1 - distance/mug_limit
