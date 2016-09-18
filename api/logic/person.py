@@ -82,8 +82,18 @@ def mug(mugger, muggee): #mugger_score, muggee_score):
 	if distance < mug_limit:
 		effectiveness = 1 - distance/mug_limit
 		money_transferred = int(effectiveness * (muggee.money) / (muggee.money + 1) ** 0.5)
+
+		if muggee.money < 0:
+			return_dict["amount"] = 0
+			return_dict["reason"] = "Muggee is broke"
+
+
 		mugger.money += money_transferred
-		muggee.money -= money_transferred
+
+		if muggee.money < money_transferred:
+			mugee.money = 0
+		else:
+			muggee.money -= money_transferred
 
 		mugger.reputation += 1
 
@@ -126,6 +136,11 @@ def drug_deal(dealer, customer, drug_amount):
 			drug_price = (drug_amount) ** (2/3)
 
 			money_amount = int(drug_amount * drug_price)
+
+			if customer.money < money_amount:
+				return_dict["money_amount"] = 0
+				return_dict["reason"] = "Customer has insufficient money"
+
 			dealer.money -= money_amount
 			customer.money += money_amount
 
@@ -157,6 +172,12 @@ def buy_in_bulk(player, drug_amount):
 		if drug_amount >= 1000:
 			drug_price = (drug_amount)**(2/3)
 			money_amount = int(drug_amount * drug_price)
+
+			if player.money < money_amount:
+				return_dict["money_amount"] = 0
+				return_dict["reason"] = "Customer has insufficient money"
+
+
 			player.money -= money_amount
 			player.drugs += drug_amount
 			player.last_drug_transaction = datetime.datetime.utcnow()
@@ -201,12 +222,14 @@ def bust(rat, victim):
 	victim loses all drugs
 	Reputation is the number of times the victim mugged someone without getting caught
 	Reputation reset to zero
-	Rat gets commission of 10
+	Rat gets commission equal to 2 ^ reputation of victim
 	"""
 
 	victim.drugs = 0
+
+	rat.money += 2 ** victim.reputation
+
 	victim.reputation = 0
-	rat.money += 10
 
 	victim.save(update_fields=["drugs", "reputation"])
 	rat.save(update_fields=["money"])
