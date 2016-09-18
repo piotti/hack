@@ -42,8 +42,9 @@ def ping(request, username, auth, lat, lon):
 		lon_coord__lte=bounds[3],
 	))
 
+	me_c = get_player_from_username(username)
 	return JsonResponse({
-		'nearby_players':[p.serialize() for p in players]
+		'nearby_players':[p.serialize() for p in players if p != me_c]
 		})
 
 
