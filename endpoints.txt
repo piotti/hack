@@ -5,7 +5,10 @@ Create User:
 
 Login User:
 <DOMAIN>/api/login_user/?username=<USERNAME>&password=<PASSWORD>
-	returns {'auth':<AUTH_KEY>}
+	returns {
+		'success':<BOOL>,
+		auth':<AUTH_KEY>
+		}
 
 
 GAME
@@ -19,14 +22,15 @@ Ping Location:
 				{
 					'lat_coord':<FLOAT>,
 					'lon_coord':<FLOAT>,
-					'criminal:<BOOL>'
-				}
+					'criminal':<BOOL>
+				},
+				>>same thing for all other players<<
 			]
 	}
 
 
 Get player info:
-<DOMAIN>/api/ping/<USERNAME>/<KEY>/<PLAYER NAME>/
+<DOMAIN>/api/player_info/<USERNAME>/<KEY>/<PLAYER NAME>/
 	returns
 	{
 		'name':<STRING>,
@@ -39,4 +43,9 @@ ACTIONS
 
 Mug:
 <DOMAIN>/api/action/mug/<USERNAME>/<KEY>/<PLAYER TO MUG>
-	returns {'success':True, 'your_money':<YOUR MONEY>, 'their_money':THEIR_MONEY}
+	returns {
+		'success':<BOOL>,
+		'your_money':<INT>,
+		'transaction':<INT>,
+		'message':<STRING> << explains error
+	}
