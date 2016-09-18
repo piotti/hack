@@ -43,8 +43,12 @@ def ping(request, username, auth, lat, lon):
 	))
 
 	me_c = get_player_from_username(username)
+	notifs = [n.msg for n in list(me_c.notifications.all())]
+	me_c.notifications.clear()
+
 	return JsonResponse({
-		'nearby_players':[p.serialize() for p in players if p != me_c]
+		'nearby_players':[p.serialize() for p in players if p != me_c],
+		'notifications':notifs
 		})
 
 
@@ -74,32 +78,44 @@ def mug(request, username, auth, player_name):
 	if not login_views.authenticate(username, auth):
 		return auth_error()
 
+	def error(msg):
+		return JsonResponse({
+		'success':False,
+		'message': msg,
+		'transaction':0,
+		'your_money':player1.money,
+
+		})
+
 	player1 = get_player_from_username(username)
 	player2 = get_player_from_username(player_name)
 
-	last_mug_date = max(
-		player1.mugger_set.filter(muggee=player2).order_by('-date')[0].date,
-		player1.muggee_set.filter(mugger=player2).order_by('-date')[0].date
-		)
+	if player1.mugger_set.all().count() != 0 and player1.muggee_set.all().count() != 0:
 
-	if last_mug_date > timezone.now() - datetime.timedelta(0, 180):
-		success=False
-		msg='You mugged or got mugged by this person too recently'
-	else:
+		last_mug_date = max(
+			player1.mugger_set.filter(muggee=player2).order_by('-date')[0].date,
+			player1.muggee_set.filter(mugger=player2).order_by('-date')[0].date
+			)
 
-		mugData = person.mug(player1, player2)
+		if last_mug_date > timezone.now() - datetime.timedelta(0, 180):
+			return error('You mugged or got mugged by this person too recently')
+	
 
-		success = mugData['money'] > 0
-		msg = mugData['reason']
+	mugData = person.mug(player1, player2)
 
-		if success:
-			mugging = Mugging(mugger=player1, muggee=player2, date=timezone.now())
-			mugging.save()
+	success = mugData['amount'] > 0
+	msg = mugData['reason']
+
+	if success:
+		mugging = Mugging(mugger=player1, muggee=player2, date=timezone.now())
+		mugging.save()
+
+	player2.sendNotification('mug')
 
 	return JsonResponse({
 		'success':success,
 		'message': msg,
-		'transaction':mugData['money'],
+		'transaction':mugData['amount'],
 		'your_money':player1.money,
 
 		})

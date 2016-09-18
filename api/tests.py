@@ -92,7 +92,50 @@ class ApiTests(TestCase):
 
 		self.assertEqual(resp.status_code, 200)
 		self.assertEqual(resp.json()['name'], 'u1')
-		self.assertEqual(resp.json()['criminal'], False)
+		self.assertIs(resp.json()['criminal'], False)
+
+
+	def test_mug(self):
+		c = Client()
+		user, key = self.makeTestUser(c)
+
+		me_c = CuckUser.objects.get(user=user)
+		me_c.lat_coord=0
+		me_c.lon_coord=0
+		me_c.money=100
+		me_c.save()
+
+		##test close
+		u1 = User(username='u1')
+		u1.save()
+		p1 = CuckUser(user=u1,
+			lat_coord=0,
+			lon_coord=0,
+			money=100)
+		p1.save()
+
+		resp = c.get('/api/action/mug/%s/%s/%s/' % (user.username, key, 'u1'))
+
+		self.assertEqual(resp.status_code, 200)
+
+		trans = resp.json()['transaction']
+		new_money = resp.json()['your_money']
+
+		self.assertIs(resp.json()['success'], True)
+		'''
+		self.assertEqual(new_money, me_c.money)
+		self.assertEqual(100+trans, new_money)
+		self.assertEqual(100-trans, p1.money)
+		'''
+
+	
+
+
+
+
+
+
+
 
 
 		

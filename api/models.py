@@ -24,17 +24,25 @@ class CuckUser(models.Model):
 	session_auth = models.CharField(max_length=64, blank=True)
 
 
+	def sendNotification(self, msg):
+		n = Notification(
+			player=self,
+			msg=msg,
+			time=timezone.now()
+		)
+		n.save()
+
+
 	def is_criminal(self):
-		if self.suspicion >= 5:
-			return True
+		return self.suspicion >= 5
 
 	def serialize(self):
 		#Returns JSON of position for other players to access
-		return {
-			'lat_coord':self.lat_coord,
-			'lon_coord':self.lon_coord,
-			'criminal':self.is_criminal(),
-		}
+		return [
+			str(self.lat_coord),
+			str(self.lon_coord),
+			str(self.is_criminal()),
+		]
 
 	def serializeProfile(self):
 		d = {
@@ -59,7 +67,21 @@ class Mugging(Event):
 	mugger = models.ForeignKey('CuckUser', related_name='mugger_set')
 	muggee = models.ForeignKey('CuckUser', related_name='muggee_set')
 
-	narc = models.ForeignKey('CuckUser', related_name='narc_set', default=None,blank=True)
+	narc = models.ForeignKey('CuckUser', related_name='narc_set', null=True,blank=True)
+
+
+class Notification(models.Model):
+	time = models.DateTimeField()
+	NOTIFS = (
+		('mug', 'Getting Mugged'),
+
+	)
+
+	msg = models.CharField(max_length=8, choices=NOTIFS)
+
+	player = models.ForeignKey('CuckUser', related_name='notifications', null=True, blank=True)
+
+
 
 
 
