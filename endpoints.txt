@@ -1,0 +1,42 @@
+LOGIN
+
+Create User:
+<DOMAIN>/api/create_user/?username=<USERNAME>&password=<PASSWORD>
+
+Login User:
+<DOMAIN>/api/login_user/?username=<USERNAME>&password=<PASSWORD>
+	returns {'auth':<AUTH_KEY>}
+
+
+GAME
+
+Ping Location:
+<DOMAIN>/api/ping/<USERNAME>/<KEY>/<LATITUDE>,<LONGITUDE>/?bounds=<LAT_LOW>,<LAT_HI>,<LON_LOW>,<LON_HI>
+	returns 
+	{
+		'nearby_players': 
+			[
+				{
+					'lat_coord':<FLOAT>,
+					'lon_coord':<FLOAT>,
+					'criminal:<BOOL>'
+				}
+			]
+	}
+
+
+Get player info:
+<DOMAIN>/api/ping/<USERNAME>/<KEY>/<PLAYER NAME>/
+	returns
+	{
+		'name':<STRING>,
+		'criminal':<BOOL>
+	}
+	>>If player name == username, also returns {'money':<INT>}
+
+
+ACTIONS
+
+Mug:
+<DOMAIN>/api/action/mug/<USERNAME>/<KEY>/<PLAYER TO MUG>
+	returns {'success':True, 'your_money':<YOUR MONEY>, 'their_money':THEIR_MONEY}
