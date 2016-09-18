@@ -23,6 +23,8 @@ class CuckUser(models.Model):
 
 
 	def is_criminal(self):
+		if self.mugger_set.count() == 0:
+			return False
 		return timezone.now() - self.mugger_set.all().order_by('-date')[0].date < datetime.timedelta(0,180)
 
 	def serialize(self):
@@ -52,7 +54,7 @@ class Event(models.Model):
 	date = models.DateTimeField()
 
 
-class Mugging(models.Model):
+class Mugging(Event):
 	mugger = models.ForeignKey('CuckUser', related_name='mugger_set')
 	muggee = models.ForeignKey('CuckUser', related_name='muggee_set')
 

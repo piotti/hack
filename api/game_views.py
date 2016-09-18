@@ -53,9 +53,8 @@ def player_info(request, username, auth, player_name):
 
 	player = get_player_from_username(player_name)
 
-	c = {
-		player.serializeProfile()
-	}
+	c = player.serializeProfile()
+	
 
 	if player_name == username:
 		#More information for own profile
